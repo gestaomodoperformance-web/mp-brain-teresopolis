@@ -7,7 +7,7 @@ from tavily import TavilyClient
 from openai import OpenAI
 
 # ==============================================================================
-# MP-BRAIN V2.0 - DOMINAÇÃO TERESÓPOLIS (MULTINICHO)
+# MP-BRAIN V2.1 - PROSPECÇÃO TOTAL TERESÓPOLIS
 # ==============================================================================
 warnings.filterwarnings("ignore")
 
@@ -18,13 +18,14 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 CIDADE = "Teresópolis, RJ"
 
-# LISTA COMPLETA DE ATUAÇÃO
+# LISTA EXPANDIDA DE ALVOS (PROFISSIONAIS, COMÉRCIOS E CLÍNICAS)
 NICHOS_MESTRE = [
-    "Academias e Crossfit", "Escritórios de Advocacia", "Clínicas de Estética",
-    "Dentistas e Ortodontistas", "Pet Shops e Veterinárias", "Oficinas Mecânicas Premium",
-    "Salões de Beleza", "Contabilidades", "Escolas Particulares", "Arquitetos",
-    "Pousadas e Hotéis", "Restaurantes e Hamburguerias", "Lojas de Móveis Planejados",
-    "Estúdios de Tatuagem", "Corretores de Seguros", "Clínicas de Psicologia"
+    "Academias e Studios de Pilates", "Escritórios de Advocacia", "Clínicas de Estética",
+    "Consultórios Odontológicos", "Pet Shops e Veterinários", "Autoescolas",
+    "Salões de Beleza e Barbearias", "Contabilidades", "Escolas e Cursos Livres", 
+    "Arquitetos e Design de Interiores", "Pousadas e Gastronomia", "Lojas de Móveis",
+    "Estúdios de Fotografia", "Corretores de Imóveis Autônomos", "Clínicas Médicas",
+    "Oficinas Mecânicas", "Lojas de Roupas Locais", "Espaços de Coworking"
 ]
 
 tavily = TavilyClient(api_key=TAVILY_API_KEY)
@@ -36,15 +37,15 @@ def enviar_telegram(mensagem):
     requests.post(url, data=payload)
 
 def run_brain():
-    print(f"🧠 MP-BRAIN: Iniciando varredura multinicho em {CIDADE}...")
+    print(f"🧠 MP-BRAIN: Varredura multinicho em {CIDADE}...")
     
-    # Seleciona 3 nichos aleatórios do "pool" para o briefing de hoje
+    # Seleção aleatória para diversificar a prospecção diária
     nichos_do_dia = random.sample(NICHOS_MESTRE, 3)
     
     briefing = f"🚀 *MP-BRAIN: Oportunidades em Teresópolis*\n"
-    briefing += f"_Foco de hoje: {', '.join(nichos_do_dia)}_\n\n"
+    briefing += f"_Alvos de hoje: {', '.join(nichos_do_dia)}_\n\n"
     
-    briefing += "*🔍 QUEM DOMINA O GOOGLE HOJE:*\n"
+    briefing += "*🔍 STATUS DE VISIBILIDADE GOOGLE:*\n"
     
     for nicho in nichos_do_dia:
         try:
@@ -54,17 +55,17 @@ def run_brain():
             briefing += f"• *{nicho}:* {', '.join(empresas)}\n"
         except: pass
 
-    # RADAR DE OPORTUNIDADES LOCAIS
+    # RADAR DE OPORTUNIDADES LOCAIS (ECONOMIA E NEGÓCIOS)
     try:
-        news_query = f"economia negócios prefeitura Teresópolis notícias"
+        news_query = f"notícias economia negócios inaugurações {CIDADE}"
         news = tavily.search(query=news_query, topic="news", days=2)
         news_context = "\n".join([f"- {r['title']}" for r in news['results']])
         
         prompt = f"""
-        Analise o cenário de Teresópolis e os nichos {nichos_do_dia}.
-        Notícias locais: {news_context}
-        Crie um plano de ataque (pitch de vendas) de 3 frases para eu abordar um desses autônomos ou empresas hoje.
-        Foque em como a Automação e o SEO podem trazer mais clientes da cidade para eles.
+        Analise o cenário atual de {CIDADE} e os nichos {nichos_do_dia}.
+        Contexto local: {news_context}
+        Crie um Pitch de Vendas agressivo e curto para abordar um desses negócios.
+        Foque em como SEO Local e Automações podem destruir a concorrência deles.
         """
         
         insight = client.chat.completions.create(
@@ -74,14 +75,14 @@ def run_brain():
         briefing += f"\n*📡 PLANO DE ATAQUE*\n_{insight}_\n"
     except: pass
 
-    # INSIGHT DE AUTORIDADE
+    # DICA TÉCNICA PARA AUTORIDADE
     try:
-        tech_prompt = "Dê uma dica de SEO Local ou Google Meu Negócio que um pequeno comerciante de Teresópolis acharia genial."
+        tech_prompt = "Dê uma dica rápida de SEO Local ou IA para pequenos negócios que eu possa postar como especialista."
         autoridade = client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": tech_prompt}]
         ).choices[0].message.content
-        briefing += f"\n*🎓 DICA PARA STATUS/STORIES*\n_{autoridade}_"
+        briefing += f"\n*🎓 INSIGHT PARA REDES SOCIAIS*\n_{autoridade}_"
     except: pass
 
     enviar_telegram(briefing)
